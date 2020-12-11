@@ -1,5 +1,11 @@
 use std::io::{self, Write};
 
+#[must_use]
+enum HandleInputOutcome {
+    Continue,
+    Exit,
+}
+
 pub fn cli_loop() -> io::Result<()> {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -11,13 +17,21 @@ pub fn cli_loop() -> io::Result<()> {
         print_prompt(&mut stdout)?;
         stdin.read_line(&mut buf)?;
 
-        if buf == "\\q\n" {
-            break Ok(());
-        } else {
-            stdout.write(b"Unexpected command: ")?;
-            stdout.write(buf.as_bytes())?;
-            stdout.write(b"\n")?;
+        match handle_input(&buf, &mut stdout)? {
+            HandleInputOutcome::Exit => break Ok(()),
+            HandleInputOutcome::Continue => (),
         }
+    }
+}
+
+fn handle_input(buf: &str, io: &mut dyn Write) -> io::Result<HandleInputOutcome> {
+    if buf == "\\q\n" {
+        Ok(HandleInputOutcome::Exit)
+    } else {
+        io.write(b"Unexpected command: ")?;
+        io.write(buf.as_bytes())?;
+        io.write(b"\n")?;
+        Ok(HandleInputOutcome::Continue)
     }
 }
 
