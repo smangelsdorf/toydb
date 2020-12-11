@@ -1,37 +1,38 @@
-use std::io::{self, Write};
+use std::io::{self, BufRead, Write};
 
-#[must_use]
-enum HandleInputOutcome {
-    Continue,
-    Exit,
-}
+use crate::cli::command::handle_command;
+use crate::cli::{Context, HandleInputOutcome};
 
 pub fn cli_loop() -> io::Result<()> {
     let stdin = io::stdin();
-    let mut stdout = io::stdout();
+    let mut input = stdin.lock();
+    let mut output = io::stdout();
 
     let mut buf = String::with_capacity(1024);
 
     loop {
         buf.clear();
-        print_prompt(&mut stdout)?;
-        stdin.read_line(&mut buf)?;
+        print_prompt(&mut output)?;
+        input.read_line(&mut buf)?;
 
-        match handle_input(&buf, &mut stdout)? {
+        let context = Context {
+            output: &mut output,
+            buf: &mut buf,
+        };
+
+        match handle_input(context)? {
             HandleInputOutcome::Exit => break Ok(()),
             HandleInputOutcome::Continue => (),
         }
     }
 }
 
-fn handle_input(buf: &str, io: &mut dyn Write) -> io::Result<HandleInputOutcome> {
-    if buf == "\\q\n" {
-        Ok(HandleInputOutcome::Exit)
+fn handle_input(context: Context) -> io::Result<HandleInputOutcome> {
+    if context.buf.starts_with("\\") {
+        handle_command(context)
     } else {
-        io.write(b"Unexpected command: ")?;
-        io.write(buf.as_bytes())?;
-        io.write(b"\n")?;
-        Ok(HandleInputOutcome::Continue)
+        // TODO Handle statement instead
+        handle_command(context)
     }
 }
 
