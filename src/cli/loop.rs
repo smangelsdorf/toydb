@@ -1,7 +1,8 @@
 use std::io::{self, BufRead, Write};
 
-use crate::cli::command::handle_command;
-use crate::cli::{Context, HandleInputOutcome};
+use crate::cli::{
+    command::handle_command, statement::handle_statement, Context, HandleInputOutcome,
+};
 
 pub fn cli_loop() -> io::Result<()> {
     let stdin = io::stdin();
@@ -31,8 +32,7 @@ fn handle_input(context: Context) -> io::Result<HandleInputOutcome> {
     if context.buf.starts_with("\\") {
         handle_command(context)
     } else {
-        // TODO Handle statement instead
-        handle_command(context)
+        handle_statement(context)
     }
 }
 
