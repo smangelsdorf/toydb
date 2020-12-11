@@ -5,3 +5,13 @@ authors = ["Shaun Mangelsdorf <s.mangelsdorf@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+nom = "^6"
+
+[lib]
+name = "toydb"
+
+[[bin]]
+name = "toydb"
+
+[[bin]]
+name = "toydb-cli"
