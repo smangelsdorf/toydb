@@ -1,4 +1,4 @@
-pub enum Query {
+pub enum Query<'a> {
     Select,
-    Insert,
+    Insert(u64, &'a str, &'a str),
 }
