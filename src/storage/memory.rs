@@ -77,6 +77,19 @@ impl Table {
         row.username[0..username_bytes.len()].copy_from_slice(username_bytes);
         row.email[0..email_bytes.len()].copy_from_slice(email_bytes);
     }
+
+    fn page_iter(&self) -> impl Iterator<Item = &Box<Page>> {
+        self.pages.iter().filter_map(|o| match o {
+            Some(ref b) => Some(b),
+            None => None,
+        })
+    }
+
+    pub fn row_iter(&self) -> impl Iterator<Item = &Row> {
+        self.page_iter()
+            .flat_map(|page| page.row_iter())
+            .take(self.num_rows as usize)
+    }
 }
 
 impl Page {
@@ -100,6 +113,11 @@ impl Page {
         o.map(|_| unsafe {
             std::mem::transmute::<*mut u8, &mut Row>(self.bytes.as_mut_ptr().add(start))
         })
+    }
+
+    fn row_iter<'a>(&'a self) -> impl Iterator<Item = &Row> + 'a {
+        let rows: Vec<&Row> = (0..ROWS_PER_PAGE).filter_map(|n| self.row(n)).collect();
+        rows.into_iter()
     }
 }
 
@@ -209,5 +227,38 @@ mod tests {
             }
             None => panic!("no pages[1]"),
         }
+
+        let all_rows: Vec<(u32, &str, &str)> = table
+            .row_iter()
+            .map(|r| {
+                (
+                    r.id,
+                    std::str::from_utf8(&r.username.split(|c| *c == 0).next().unwrap()).unwrap(),
+                    std::str::from_utf8(&r.email.split(|c| *c == 0).next().unwrap()).unwrap(),
+                )
+            })
+            .collect();
+        assert_eq!(
+            all_rows,
+            vec![
+                (1, "test01", "test@example.com"),
+                (2, "test02", "test@example.com"),
+                (3, "test03", "test@example.com"),
+                (4, "test04", "test@example.com"),
+                (5, "test05", "test@example.com"),
+                (6, "test06", "test@example.com"),
+                (7, "test07", "test@example.com"),
+                (8, "test08", "test@example.com"),
+                (9, "test09", "test@example.com"),
+                (10, "test10", "test@example.com"),
+                (11, "test11", "test@example.com"),
+                (12, "test12", "test@example.com"),
+                (13, "test13", "test@example.com"),
+                (14, "test14", "test@example.com"),
+                (15, "test15", "test@example.com"),
+                (16, "test16", "test@example.com"),
+                (17, "test17", "test@example.com"),
+            ]
+        );
     }
 }
