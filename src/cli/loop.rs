@@ -4,12 +4,16 @@ use crate::cli::{
     command::handle_command, statement::handle_statement, Context, HandleInputOutcome,
 };
 
+use crate::storage::memory::Table;
+
 pub fn cli_loop() -> io::Result<()> {
     let stdin = io::stdin();
     let mut input = stdin.lock();
     let mut output = io::stdout();
 
     let mut buf = String::with_capacity(1024);
+
+    let mut table = Table::new();
 
     loop {
         buf.clear();
@@ -19,6 +23,7 @@ pub fn cli_loop() -> io::Result<()> {
         let context = Context {
             output: &mut output,
             buf: &mut buf,
+            table: &mut table,
         };
 
         match handle_input(context)? {

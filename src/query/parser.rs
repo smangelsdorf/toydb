@@ -14,7 +14,7 @@ pub fn parse_sql(input: &str) -> Result<(&str, ast::Query), nom::Err<VerboseErro
             tuple((
                 tag_no_case("insert"),
                 space1,
-                map_res(digit1, u64::from_str),
+                map_res(digit1, u32::from_str),
                 space1,
                 recognize(many1(satisfy(|c| !c.is_whitespace()))),
                 space1,
