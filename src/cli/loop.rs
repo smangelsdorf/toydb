@@ -6,11 +6,11 @@ use crate::cli::{
 
 use crate::storage::memory::Table;
 
-pub fn cli_loop() -> io::Result<()> {
-    let stdin = io::stdin();
-    let mut input = stdin.lock();
-    let mut output = io::stdout();
-
+pub fn cli_loop<I, O>(mut input: I, mut output: O) -> io::Result<()>
+where
+    I: BufRead,
+    O: Write,
+{
     let mut buf = String::with_capacity(1024);
 
     let mut table = Table::new();
@@ -41,7 +41,7 @@ fn handle_input(context: Context) -> io::Result<HandleInputOutcome> {
     }
 }
 
-fn print_prompt(stdout: &mut io::Stdout) -> io::Result<()> {
+fn print_prompt(stdout: &mut dyn io::Write) -> io::Result<()> {
     stdout.write(b"> ")?;
     stdout.flush()
 }
