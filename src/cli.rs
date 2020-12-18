@@ -35,4 +35,15 @@ mod tests {
             output_string
         );
     }
+
+    #[test]
+    #[should_panic]
+    fn insert_sanity_check_test() {
+        let input: &'_ [u8] = b"insert 1 thisvalueiswaytoolongforthefielditsbeingputin \
+            test@example.com\nselect\n\\q\n";
+
+        let mut output: Vec<u8> = Vec::with_capacity(256);
+
+        cli_loop(input, &mut output).unwrap();
+    }
 }
