@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 use nom::{
-    branch::*, bytes::streaming::*, character::streaming::*, character::*, combinator::*,
-    error::VerboseError, multi::*, sequence::*, IResult,
+    branch::*, bytes::streaming::*, character::streaming::*, combinator::*, error::VerboseError,
+    multi::*, sequence::*,
 };
 
 use crate::query::ast;
