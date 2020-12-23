@@ -20,6 +20,8 @@ struct Context<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::io;
+
     use super::r#loop::cli_loop;
 
     #[test]
@@ -45,5 +47,19 @@ mod tests {
         let mut output: Vec<u8> = Vec::with_capacity(256);
 
         cli_loop(input, &mut output).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn insert_full_table_test() {
+        let mut input: String = String::with_capacity(60_000);
+        for i in 0..1401 {
+            input.extend(format!("insert {i} value{i} user{i}@example.com\n", i = i).chars());
+        }
+        input.extend("\\q\n".chars());
+
+        let mut output = io::sink();
+
+        cli_loop(input.as_bytes(), &mut output).unwrap();
     }
 }
